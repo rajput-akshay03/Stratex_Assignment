@@ -5,6 +5,7 @@ const {Authorize,isSeller,isBuyer}= require("../middlewares/Auth");
 
 const router=Router();
 router.post("/upload",Authorize,isSeller,uploadBook);
+// router.post("/up",up);
 router.delete("/delete",Authorize,isSeller,deleteBook);
 router.put("/update",Authorize,isSeller,updateBook);
 router.get("/getSellerBooks",Authorize,isSeller,getSellerBook);

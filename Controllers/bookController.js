@@ -1,23 +1,65 @@
 const prisma =require("../database/dbConnection");
 
+// for parsing csv
+function parsingCsv(req) {
+    return new Promise((resolve, reject) => {
+      /** @type {any[]} */
+      const chunks = [];
+      req.on('data', (data) => {
+        chunks.push(data);
+      });
+      req.on('end', () => {
+        const payload = Buffer.concat(chunks).toString()
+        resolve(payload);
+      });
+      req.on('error', reject);
+    });
+  }
+// for csv to json
+const csvTojson = async(req,user_id)=>{
+   const csv=await parsingCsv(req)
+   const temp = csv.split('\n')
+   const lines= temp.slice(4,temp.length-6)
+   const result = []
+   const headers = lines[0].split(',')
+
+for (let i = 1; i < lines.length; i++) {        
+    if (!lines[i])
+        continue
+    const obj = {}
+    const currentline = lines[i].split(',')
+
+    for (let j = 0; j < headers.length; j++) {
+        if(j==(headers.length-1))
+        {
+              const key= headers[j].slice(0,-1);
+              const value = currentline[j].slice(0,-1);
+              obj[key] = parseFloat(value)
+        }
+        else
+        obj[headers[j]] = currentline[j]
+    
+    }
+    obj["user_id"]= parseInt(user_id)
+    result.push(obj)
+}
+    return result;
+}
 // for uploading a book
 const uploadBook = async(req,res)=>{
-      const {title,author,publishedDate,price}=req.body;
-      const user_id=req.user.userId;
-      const book = await prisma.books.create({
-          data:{
-               title:title,
-               author:author,
-               price:price,
-               user_id:user_id,
-               publishedDate:publishedDate
-          }
+    const user_id=req.user.userId;
+      const jsonfile=await csvTojson(req,user_id);
+    //   const {title,author,publishedDate,price}=req.body;
+      console.log(jsonfile)
+      const book = await prisma.books.createMany({
+        data:jsonfile
       })
       res.json({
          message:"file uploaded succesfully",
-         Book: book
+         Book: ""
       })
 }
+
 // for updating the entry of book
 const updateBook = async(req,res)=>{
      const {book_id,title,author,price,publishedDate}= req.body;

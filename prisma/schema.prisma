@@ -27,7 +27,7 @@ model Books{
     id Int @id @default(autoincrement())
     title String
     author String
-    publishedDate DateTime @default(now())
+    publishedDate String
     price Float
     user User @relation(fields: [user_id],references: [id],onDelete: Cascade)
     user_id Int  
