@@ -2,14 +2,15 @@ const prisma =require("../database/dbConnection");
 
 // for uploading a book
 const uploadBook = async(req,res)=>{
-      const {title,author,price}=req.body;
+      const {title,author,publishedDate,price}=req.body;
       const user_id=req.user.userId;
       const book = await prisma.books.create({
           data:{
                title:title,
                author:author,
                price:price,
-               user_id:user_id
+               user_id:user_id,
+               publishedDate:publishedDate
           }
       })
       res.json({
@@ -19,7 +20,7 @@ const uploadBook = async(req,res)=>{
 }
 // for updating the entry of book
 const updateBook = async(req,res)=>{
-     const {book_id,title,author,price}= req.body;
+     const {book_id,title,author,price,publishedDate}= req.body;
      const user_id=req.user.userId;
      const book = await prisma.books.findFirst({
         where:{
@@ -42,7 +43,8 @@ const updateBook = async(req,res)=>{
         data:{
             title:title,
             author:author,
-            price:price
+            price:price,
+            publishedDate:publishedDate
         }
      })
     return res.json({
